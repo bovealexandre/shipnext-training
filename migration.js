@@ -12,6 +12,8 @@ const dbConfig = {
 };
 
 const schema = `
+scalar GraphbackDateTime
+
 """
 @model
 """
@@ -30,7 +32,10 @@ type Exchange {
   from: String!
   to: String!
   ask: Float!
-  date: String!
+  """
+  Usage of the Graphback DateTime scalar
+  """
+  date: GraphbackDateTime!
 }
 
 """
@@ -42,7 +47,10 @@ type Rate {
   in: Float!
   out: Float!
   reserve: Int!
-  date: String!
+  """
+  Usage of the Graphback DateTime scalar
+  """
+  date: GraphbackDateTime!
 }
 
 """

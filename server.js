@@ -7,13 +7,11 @@ const Knex = require('knex');
 const app = express();
  
 const schema = `
-"""
-@model
-"""
+scalar GraphbackDateTime
+
 type ExchangeOffice {
     id: ID!
     name: String!
-    country: String!
     exchanges: [Exchange!]!
     rates: [Rate!]!
     country: Country!
@@ -23,7 +21,7 @@ type Exchange {
     from: String!
     to: String!
     ask: Float!
-    date: DateTime!
+    date: GraphbackDateTime!
 }
   
 type Rate {
@@ -32,18 +30,20 @@ type Rate {
     in: Float!
     out: Float!
     reserve: Int!
-    date: DateTime!
+    date: GraphbackDateTime!
 }
 
 type Country {
-    code = UKR
-    name = Ukraine
+    id: ID!
+    code: String!
+    name: String!
 }
 
 type Query {
     exchangeOffices(id: ID!): ExchangeOffice
+    getTopCurrencyExchangers: [ExchangeOffice]
 }
-  
+
 schema {
     query: Query
 }
@@ -69,7 +69,51 @@ const exchangeResolvers = {
   Query: {
     exchangeOffices: (parent, args, context) => {
       return context.db.exchangeOffices(args.id);
-    }
+    },
+    getTopCurrencyExchangers: (parent, args, context) => {
+        const exchangeOffices = context.db.getTopCurrencyExchangers();
+
+        const profitsByCountry = {};
+
+        exchangeOffices.forEach((exchangeOffice) => {
+            const { id, name, country, exchanges } = exchangeOffice;
+            let totalProfit = 0;
+
+            exchanges.forEach((exchange) => {
+            const baseCurrency = 'USD';
+
+            const pairProfit = calculatePairProfit(exchange, baseCurrency);
+
+            totalProfit += pairProfit;
+            });
+
+            if (profitsByCountry[country]) {
+            profitsByCountry[country].push({
+                id,
+                name,
+                profit: totalProfit,
+            });
+            } else {
+            profitsByCountry[country] = [{
+                id,
+                name,
+                profit: totalProfit,
+            }];
+            }
+        });
+
+        for (const country in profitsByCountry) {
+            profitsByCountry[country].sort((a, b) => b.profit - a.profit);
+        }
+
+        const topCurrencyExchangers = {};
+
+        for (const country in profitsByCountry) {
+            topCurrencyExchangers[country] = profitsByCountry[country].slice(0, 3);
+        }
+
+        return topCurrencyExchangers;
+      },
   }
 }
  

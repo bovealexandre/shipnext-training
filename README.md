@@ -6,7 +6,7 @@ To successfully complete the test for NextShip, please follow the steps below:
 2. Install the project dependencies by running the following command in the project directory:
 
     ```shell
-   yarn install
+   yarn
     ```
 
 3. Run the database migration by executing the following command:
@@ -15,7 +15,7 @@ To successfully complete the test for NextShip, please follow the steps below:
     yarn migration
     ```
 
-This command will set up the required database structure for the project. Make sure you have the necessary database credentials configured in the project's configuration files. or you can run :
+    This command will set up the required database structure for the project. Make sure you have the necessary database credentials configured in the project's configuration files. or you can run :
 
     ```shell
     docker-compose up
